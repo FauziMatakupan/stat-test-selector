@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which Statistical Test Should I Use? — Free Interactive Selector</title>
+<meta name="description" content="Answer 5 questions about your data and get the right statistical test — with assumptions, effect size, and APA 7 reporting template. Free, no signup.">
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--acc:#38bdf8;--ok:#4ade80;--warn:#fbbf24;--txt:#e2e8f0;--mut:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2rem 1rem}
+.wrap{max-width:760px;width:100%}
+h1{font-size:1.6rem;margin-bottom:.4rem}
+.sub{color:var(--mut);margin-bottom:1.6rem;font-size:.95rem}
+.card{background:var(--card);border-radius:12px;padding:1.4rem;margin-bottom:1rem;border:1px solid #334155}
+.q-label{font-size:.8rem;letter-spacing:.08em;color:var(--acc);text-transform:uppercase;margin-bottom:.5rem}
+.q-text{font-size:1.1rem;margin-bottom:.9rem;line-height:1.45}
+.opts{display:grid;gap:.55rem}
+button.opt{text-align:left;background:#0f172a;border:1px solid #334155;color:var(--txt);padding:.75rem .9rem;border-radius:8px;cursor:pointer;font-size:.95rem;transition:border-color .15s,background .15s;line-height:1.4}
+button.opt:hover{border-color:var(--acc)}
+button.opt.sel{border-color:var(--acc);background:#0c2d48}
+.nav{display:flex;gap:.6rem;margin-top:1.1rem}
+.nav button{padding:.55rem 1.2rem;border-radius:8px;border:none;cursor:pointer;font-size:.92rem}
+#back{background:transparent;color:var(--mut);border:1px solid #334155}
+#next{background:var(--acc);color:#0f172a;font-weight:600}
+#next:disabled{opacity:.35;cursor:not-allowed}
+.prog{height:4px;background:#334155;border-radius:2px;margin-bottom:1.4rem;overflow:hidden}
+.prog div{height:100%;background:var(--acc);width:0;transition:width .25s}
+#result h2{color:var(--ok);margin-bottom:.6rem;font-size:1.3rem}
+.testname{font-size:1.5rem;font-weight:700;margin:.2rem 0 .8rem}
+.why{color:var(--mut);font-size:.92rem;margin-bottom:1rem;line-height:1.5}
+.sec{margin:.8rem 0}
+.sec h3{font-size:.85rem;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem}
+.sec ul{padding-left:1.2rem;font-size:.92rem;line-height:1.6}
+.sec code{background:#0f172a;padding:.15rem .4rem;border-radius:4px;font-size:.85rem;color:#7dd3fc}
+.apt{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:.9rem;font-size:.9rem;line-height:1.6;white-space:pre-wrap}
+.alt{font-size:.85rem;color:var(--mut)}
+.foot{margin-top:1.4rem;font-size:.85rem;color:var(--mut);text-align:center;line-height:1.6}
+.foot a{color:var(--acc);text-decoration:none}
+.hidden{display:none}
+.warnbox{background:#422006;border:1px solid #a16207;border-radius:8px;padding:.7rem .9rem;font-size:.88rem;margin:.6rem 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Which statistical test should I use?</h1>
+<p class="sub">Answer 5 questions about your data and hypothesis. Get the right test, its assumptions, an effect size to report, and an APA 7-style sentence you can adapt. Free, no signup, runs entirely in your browser.</p>
+<div class="prog"><div id="bar"></div></div>
+
+<div id="quiz"></div>
+
+<div id="result" class="hidden">
+  <div class="card">
+    <h2>Recommended test</h2>
+    <div class="testname" id="r-name"></div>
+    <p class="why" id="r-why"></p>
+    <div id="r-warn"></div>
+    <div class="sec"><h3>Check these assumptions first</h3><ul id="r-assump"></ul></div>
+    <div class="sec"><h3>Effect size to report</h3><div id="r-eff"></div></div>
+    <div class="sec"><h3>APA 7-style reporting template</h3><div class="apt" id="r-apa"></div></div>
+    <div class="sec alt" id="r-alt"></div>
+  </div>
+  <div class="foot">
+    <p>Need the full walkthrough — decision flowchart, every assumption test, and ready-to-adapt APA sentences for all major tests?</p>
+    <p><a href="#" id="guide-link">Choosing &amp; Reporting Statistical Tests: Thesis Survival Guide →</a></p>
+    <p style="margin-top:.6rem;font-size:.78rem">Educational tool, not statistical consultation. Verify with your supervisor or a statistician for high-stakes research.</p>
+  </div>
+</div>
+</div>
+
+<script>
+const QS=[
+ {id:'dv',t:'What type of outcome (dependent variable) are you analyzing?',o:[
+  ['continuous','Continuous / scale (height, score, income, test mark)'],
+  ['binary','Binary / two categories (pass-fail, yes-no, converted-not)'],
+  ['count','Count (number of events: visits, errors, purchases)'],
+  ['cat','Categories with 3+ levels (brand chosen, blood type)']]},
+ {id:'groups',t:'How many groups or conditions are you comparing?',o:[
+  ['one','One group only (compare to a known value or look at association)'],
+  ['two','Two independent groups (men vs women, control vs treatment)'],
+  ['twopaired','Two paired/related measurements (before-after, same person twice)'],
+  ['three','Three or more groups (A vs B vs C)']]},
+ {id:'iv',t:'What is the nature of your predictor (independent variable)?',o:[
+  ['cat','Categorical (groups, categories)'],
+  ['cont','Continuous (age, dose, income, time)'],
+  ['mix','Both categorical and continuous predictors together']]},
+ {id:'normal',t:'Is your continuous outcome roughly normally distributed (bell-shaped, no extreme outliers)?',o:[
+  ['yes','Yes — histogram looks symmetric, outliers handled'],
+  ['no','No / not sure — skewed, small n, or ordinal scale'],
+  ['na','Not applicable (my outcome is not continuous)']]},
+ {id:'indep',t:'Are your observations independent of each other?',o:[
+  ['yes','Yes — each subject contributes one observation'],
+  ['no','No — repeated measures, clustered, or matched data']]},
+];
+let step=0,ans={};
+function render(){
+ const q=QS[step];
+ document.getElementById('bar').style.width=(step/QS.length*100)+'%';
+ if(step<QS.length){
+  let h=`<div class="card"><div class="q-label">Question ${step+1} of ${QS.length}</div><div class="q-text">${q.t}</div><div class="opts">`;
+  q.o.forEach(([v,l])=>{h+=`<button class="opt ${ans[q.id]===v?'sel':''}" data-v="${v}">${l}</button>`});
+  h+=`</div><div class="nav"><button id="back" ${step===0?'disabled style="opacity:.35"':''}>Back</button><button id="next" ${ans[q.id]?'':'disabled'}>${step===QS.length-1?'See result':'Next'}</button></div></div>`;
+  document.getElementById('quiz').innerHTML=h;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{ans[q.id]=b.dataset.v;render()});
+  document.getElementById('back').onclick=()=>{if(step>0){step--;render()}};
+  document.getElementById('next').onclick=()=>{if(ans[q.id]){step++;step<QS.length?render():showResult()}};
+ }else showResult();
+}
+function pick(){
+ const dv=ans.dv,g=ans.groups,iv=ans.iv,n=ans.normal,ind=ans.indep;
+ if(dv==='binary'){
+  if(iv==='cont')return{k:'logreg',n:'Binary logistic regression'};
+  if(g==='twopaired'||ind==='no')return{k:'mcnemar',n:"McNemar's test"};
+  return{k:'chisq',n:g==='three'?"Chi-square test (r×c)":'Chi-square test or Fisher exact (if any expected count < 5)'};
+ }
+ if(dv==='count')return{k:'poisson',n:'Poisson regression (or negative binomial if overdispersed)'};
+ if(dv==='cat')return{k:'chisq',n:'Chi-square test of independence (r×c)'};
+ // continuous
+ if(iv==='mix')return{k:'mlr',n:'Multiple linear regression (or ANCOVA for group adjustment)'};
+ if(iv==='cont')return{k:'slr',n:n==='yes'?'Simple linear regression (Pearson correlation as companion)':'Spearman correlation (monotonic, no linearity assumption)'};
+ // categorical IV
+ if(g==='one')return n==='yes'?{k:'ttest1',n:'One-sample t-test'}:{k:'wilcoxon1',n:'One-sample Wilcoxon signed-rank test'};
+ if(g==='twopaired')return n==='yes'?{k:'tpaired',n:'Paired-samples t-test'}:{k:'wilcoxon',n:'Wilcoxon signed-rank test'};
+ if(g==='two')return n==='yes'?{k:'ttest',n:'Independent-samples t-test'}:{k:'mannwhitney',n:"Mann-Whitney U test"};
+ if(g==='three')return n==='yes'?{k:'anova',n:'One-way ANOVA (+ Tukey post-hoc)'}:{k:'kruskal',n:"Kruskal-Wallis H test (+ Dunn's post-hoc)"};
+}
+const DB={
+ ttest1:{why:'You compare one group mean against a known or hypothesized value.',a:['Normality of the outcome (Shapiro-Wilk or Q-Q plot; t-test is robust when n ≥ 30)','Data measured on an interval/ratio scale'],e:"Cohen's d = (M − μ₀) / SD — small .2, medium .5, large .8",apa:'A one-sample t-test showed that the sample mean (M = 42.3, SD = 7.1) differed significantly from the hypothesized value of 40, t(58) = 2.51, p = .015, d = 0.33.',alt:'If normality fails even after transformation, use the one-sample Wilcoxon signed-rank test.'},
+ ttest:{why:'You compare the means of two independent groups.',a:['Normality within each group (Shapiro-Wilk; robust when both n ≥ 30)','Homogeneity of variance (Levene test — if violated, report Welch t-test)','Independence of observations'],e:"Cohen's d = (M₁ − M₂) / pooled SD — small .2, medium .5, large .8",apa:'An independent-samples t-test showed that the treatment group (M = 74.2, SD = 6.8) scored higher than the control group (M = 69.5, SD = 7.4), t(98) = 3.21, p = .002, d = 0.65.',alt:'Non-normal: Mann-Whitney U test. Unequal variances: Welch correction (report as t-test with Welch correction).'},
+ tpaired:{why:'You compare two measurements from the same subjects (before/after, matched pairs).',a:['Normality of the DIFFERENCES (not the two raw scores)','Pairs are genuinely matched; no missing pairs bias'],e:"Cohen's d for paired data = mean(differences) / SD(differences)",apa:'A paired-samples t-test showed that scores improved from pre-test (M = 61.4, SD = 8.2) to post-test (M = 68.9, SD = 7.6), t(44) = 5.87, p < .001, d = 0.87.',alt:'Non-normal differences: Wilcoxon signed-rank test.'},
+ anova:{why:'You compare means across three or more independent groups.',a:['Normality within each group','Homogeneity of variance (Levene — if violated, report Welch ANOVA)','Independence of observations'],e:'η² (eta-squared) — small .01, medium .06, large .14 (or report ω², less biased)',apa:'A one-way ANOVA showed a significant effect of teaching method on exam scores, F(2, 147) = 8.43, p < .001, η² = .10. Tukey HSD post-hoc tests showed Method C (M = 78.1) outperformed both Method A (p = .003) and Method B (p = .041).',alt:'Non-normal: Kruskal-Wallis H test. Always follow a significant ANOVA with post-hoc tests — never compare all pairs with t-tests.'},
+ mannwhitney:{why:'Two independent groups, but normality is doubtful or your scale is ordinal.',a:['Similar distribution shapes across groups (for interpreting as a median difference)','Independence of observations'],e:'r = Z / √N — small .1, medium .3, large .5 (or rank-biserial correlation)',apa:'A Mann-Whitney U test showed that ranks differed between the two groups, U = 342.5, z = 2.87, p = .004, r = .29; the treatment group had higher scores (Mdn = 72) than the control group (Mdn = 64).',alt:'If n is large enough and normality is only mildly violated, the t-test remains defensible — check both, report the one your committee accepts.'},
+ wilcoxon:{why:'Two paired measurements with non-normal differences or ordinal scale.',a:['Differences are symmetric around the median (for median interpretation)','Pairs are genuinely matched'],e:'r = Z / √N',apa:'A Wilcoxon signed-rank test showed that median pain scores decreased from pre (Mdn = 7) to post (Mdn = 4), z = 3.94, p < .001, r = .55.',alt:'If differences become normal after transformation, the paired t-test has more power.'},
+ kruskal:{why:'Three or more independent groups with non-normal or ordinal outcomes.',a:['Similar distribution shapes across groups','Independence of observations'],e:'ε² or η²H — report per your field convention',apa:"A Kruskal-Wallis H test showed a significant difference among the three groups, H(2) = 11.62, p = .003. Dunn's post-hoc tests with Bonferroni correction showed Group 3 > Group 1 (p = .002).",alt:'If group distributions look normal, one-way ANOVA is more powerful.'},
+ chisq:{why:'You test whether two categorical variables are associated.',a:['Expected count ≥ 5 in ≥ 80% of cells (otherwise use Fisher exact for 2×2, or merge categories)','Independent observations'],e:"Cramér's V — small .1, medium .3, large .5 (df = 1; adjust for larger tables)",apa:"A chi-square test of independence showed a significant association between program type and outcome, χ²(2, N = 210) = 9.84, p = .007, Cramér's V = .22.",alt:'Small expected counts: Fisher exact test (2×2) or likelihood-ratio chi-square.'},
+ mcnemar:{why:'You compare two paired proportions (same subjects, binary outcome, two timepoints/conditions).',a:['Paired binary data — discordant pairs drive the test'],e:'Effect size: odds ratio of discordant pairs, or Cohen g',apa:"McNemar's test showed a significant change in pass rates from pre (48%) to post (64%), χ²(1, N = 100) = 5.76, p = .016.",alt:'More than two timepoints: Cochran Q test.'},
+ logreg:{why:'You predict a binary outcome from one or more predictors.',a:['Linearity of the logit for continuous predictors','No perfect multicollinearity (check VIF)','Adequate events per variable (≥ 10 EPV as a floor rule of thumb)'],e:'Odds ratio (OR) with 95% CI — interpret per unit increase',apa:'Binary logistic regression showed that study hours significantly predicted pass status, OR = 1.42, 95% CI [1.11, 1.82], p = .005, controlling for prior GPA. The model explained 24% of variance (Nagelkerke R² = .24).',alt:'Rare outcomes (< 5%): consider Firth logistic regression to reduce small-sample bias.'},
+ poisson:{why:'You model a count outcome (events per unit of time/exposure).',a:['Mean ≈ variance (if variance ≫ mean, use negative binomial)','No excessive zeros (consider zero-inflated models)','Exposure window is comparable across observations'],e:'Incidence rate ratio (IRR) with 95% CI',apa:'Poisson regression showed that each additional training session was associated with 12% fewer errors, IRR = 0.88, 95% CI [0.81, 0.96], p = .003.',alt:'Overdispersion: negative binomial regression. Excess zeros: zero-inflated Poisson.'},
+ slr:{why:'You model a continuous outcome from one continuous predictor.',a:['Linearity (scatterplot)','Normality of residuals','Homoscedasticity (residuals vs fitted plot)','No influential outliers (Cook distance)'],e:'Standardized β or r² — r² .01/.09/.25 = small/medium/large variance explained',apa:'Simple linear regression showed that weekly study hours significantly predicted exam scores, b = 3.24, SE = 0.71, β = .48, t(118) = 4.56, p < .001, R² = .15.',alt:'Curvilinear pattern: add a quadratic term or consider nonparametric smoothing. Monotonic-but-not-linear: Spearman correlation.'},
+ mlr:{why:'You have multiple predictors, or want to adjust a group effect for covariates.',a:['No multicollinearity (VIF < 5 as a common threshold)','Linearity + homoscedasticity of residuals','Normality of residuals','n ≥ 10-20 observations per predictor (floor rule of thumb)'],e:'Semi-partial (part) R² per predictor; overall R²',apa:'Multiple regression showed that study hours (b = 2.91, p < .001) and attendance (b = 1.87, p = .012) both predicted exam scores, controlling for prior GPA, F(3, 116) = 18.4, p < .001, R² = .32.',alt:'Categorical + continuous mix with an interaction question: report it as ANCOVA-style, but the model is the same regression.'},
+ wilcoxon1:{why:'One group, non-normal outcome, compared to a hypothesized median.',a:['Symmetric distribution around the median'],e:'r = Z / √N',apa:'A one-sample Wilcoxon signed-rank test showed that the median (Mdn = 3.8) differed from the hypothesized value of 3.0, z = 2.64, p = .008, r = .34.',alt:'If normality holds, prefer the one-sample t-test (more power).'},
+};
+function showResult(){
+ document.getElementById('bar').style.width='100%';
+ document.getElementById('quiz').classList.add('hidden');
+ const r=pick(),d=DB[r.k];
+ document.getElementById('r-name').textContent=r.n;
+ document.getElementById('r-why').textContent=d.why;
+ document.getElementById('r-assump').innerHTML=d.a.map(x=>`<li>${x}</li>`).join('');
+ document.getElementById('r-eff').innerHTML=`<p>${d.e}</p>`;
+ document.getElementById('r-apa').textContent=d.apa;
+ document.getElementById('r-alt').innerHTML='<h3>If assumptions fail</h3><p>'+d.alt+'</p>';
+ let w='';
+ if(ans.normal==='no'&&['ttest1','ttest','tpaired','anova','slr','mlr'].includes(r.k))w='<div class="warnbox">You said your data may not be normal. The t-test/ANOVA family is fairly robust for large, equal samples — but check the "If assumptions fail" line below before committing.</div>';
+ if(ans.indep==='no'&&!['tpaired','wilcoxon','mcnemar'].includes(r.k))w+='<div class="warnbox">You said observations are NOT independent. Standard tests assume independence — consider a repeated-measures or mixed model, and discuss with a statistician.</div>';
+ document.getElementById('r-warn').innerHTML=w;
+ document.getElementById('result').classList.remove('hidden');
+}
+render();
+</script>
+</body>
+</html>
